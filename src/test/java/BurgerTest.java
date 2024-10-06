@@ -13,10 +13,13 @@ import praktikum.IngredientType;
 import java.util.List;
 
 public class BurgerTest {
-    private static final int INGREDIENT_PRICE = 10;
-    private static final int BUN_PRICE = 9;
-    private static final Ingredient INGREDIENT = new Ingredient(IngredientType.FILLING, "testIngredient", INGREDIENT_PRICE);
-    private static final Bun BUN = new Bun("testBun", BUN_PRICE);
+    private static final float INGREDIENT_PRICE = 10;
+    private static final float BUN_PRICE = 9;
+    private static final String BUN_NAME = "testBun";
+    private static final String INGREDIENT_NAME = "testIngredient";
+    private static final IngredientType INGREDIENT_TYPE = IngredientType.FILLING;
+    private static final Ingredient INGREDIENT = new Ingredient(INGREDIENT_TYPE, INGREDIENT_NAME, INGREDIENT_PRICE);
+    private static final Bun BUN = new Bun(BUN_NAME, BUN_PRICE);
     private static final int DEFAULT_TEST_INDEX = 1;
     private static final int ANOTHER_TEST_INDEX = 3;
 
@@ -81,14 +84,23 @@ public class BurgerTest {
 
     @Test
     public void getReceiptShouldReturnExpectedString() {
+        Bun mockBun = Mockito.mock(Bun.class);
+        Ingredient mockIngredient = Mockito.mock(Ingredient.class);
+        Mockito.when(mockBun.getName()).thenReturn(BUN_NAME);
+        Mockito.when(mockBun.getPrice()).thenReturn(BUN_PRICE);
+        Mockito.when(mockIngredient.getName()).thenReturn(INGREDIENT_NAME);
+        Mockito.when(mockIngredient.getType()).thenReturn(INGREDIENT_TYPE);
+        Mockito.when(mockIngredient.getPrice()).thenReturn(INGREDIENT_PRICE);
+        float expectedPrice = 2 * BUN_PRICE + INGREDIENT_PRICE;
+
         burger = new Burger();
         burger.setBuns(BUN);
         burger.addIngredient(INGREDIENT);
 
-        StringBuilder buildingReceipt = new StringBuilder(String.format("(==== %s ====)%n", BUN.getName()));
-        buildingReceipt.append(String.format("= %s %s =%n", INGREDIENT.getType().toString().toLowerCase(), INGREDIENT.getName()));
-        buildingReceipt.append(String.format("(==== %s ====)%n", BUN.getName()));
-        buildingReceipt.append(String.format("%nPrice: %f%n", burger.getPrice()));
+        StringBuilder buildingReceipt = new StringBuilder(String.format("(==== %s ====)%n", BUN_NAME));
+        buildingReceipt.append(String.format("= %s %s =%n", INGREDIENT_TYPE.toString().toLowerCase(), INGREDIENT_NAME));
+        buildingReceipt.append(String.format("(==== %s ====)%n", BUN_NAME));
+        buildingReceipt.append(String.format("%nPrice: %f%n", expectedPrice));
         String expectedReceipt = buildingReceipt.toString();
 
         Assertions.assertEquals(expectedReceipt, burger.getReceipt());
@@ -103,12 +115,17 @@ public class BurgerTest {
 
     @Test
     public void getReceiptWithoutIngredientShouldReturnExpectedString() {
-        burger = new Burger();
-        burger.setBuns(BUN);
+        Bun mockBun = Mockito.mock(Bun.class);
+        Mockito.when(mockBun.getName()).thenReturn(BUN_NAME);
+        Mockito.when(mockBun.getPrice()).thenReturn(BUN_PRICE);
+        float expectedPrice = 2 * BUN_PRICE;
 
-        StringBuilder buildingReceipt = new StringBuilder(String.format("(==== %s ====)%n", BUN.getName()));
-        buildingReceipt.append(String.format("(==== %s ====)%n", BUN.getName()));
-        buildingReceipt.append(String.format("%nPrice: %f%n", burger.getPrice()));
+        burger = new Burger();
+        burger.setBuns(mockBun);
+
+        StringBuilder buildingReceipt = new StringBuilder(String.format("(==== %s ====)%n", BUN_NAME));
+        buildingReceipt.append(String.format("(==== %s ====)%n", BUN_NAME));
+        buildingReceipt.append(String.format("%nPrice: %f%n", expectedPrice));
         String expectedReceipt = buildingReceipt.toString();
 
         Assertions.assertEquals(expectedReceipt, burger.getReceipt());
