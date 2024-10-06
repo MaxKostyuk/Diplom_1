@@ -22,29 +22,31 @@ public class BurgerTest {
     private static final Bun BUN = new Bun(BUN_NAME, BUN_PRICE);
     private static final int DEFAULT_TEST_INDEX = 1;
     private static final int ANOTHER_TEST_INDEX = 3;
+    private Burger burger;
 
     @Mock
     private List<Ingredient> mockList;
     @InjectMocks
-    private Burger burger;
+    private Burger mockedBurger;
 
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
+        mockedBurger = new Burger();
+        mockedBurger.ingredients = mockList;
         burger = new Burger();
-        burger.ingredients = mockList;
     }
 
     @Test
     public void addIngredientShouldCallMockOnce() {
-        burger.addIngredient(INGREDIENT);
+        mockedBurger.addIngredient(INGREDIENT);
         Mockito.verify(mockList, Mockito.times(1)).add(INGREDIENT);
         Mockito.verifyNoMoreInteractions(mockList);
     }
 
     @Test
     public void removeIngredientShouldCallMockOnce() {
-        burger.removeIngredient(DEFAULT_TEST_INDEX);
+        mockedBurger.removeIngredient(DEFAULT_TEST_INDEX);
         Mockito.verify(mockList, Mockito.times(1)).remove(DEFAULT_TEST_INDEX);
         Mockito.verifyNoMoreInteractions(mockList);
     }
@@ -52,7 +54,7 @@ public class BurgerTest {
     @Test
     public void moveIngredientShouldCallRemoveAndAdd() {
         Mockito.when(mockList.remove(DEFAULT_TEST_INDEX)).thenReturn(INGREDIENT);
-        burger.moveIngredient(DEFAULT_TEST_INDEX, ANOTHER_TEST_INDEX);
+        mockedBurger.moveIngredient(DEFAULT_TEST_INDEX, ANOTHER_TEST_INDEX);
         Mockito.verify(mockList, Mockito.times(1)).remove(DEFAULT_TEST_INDEX);
         Mockito.verify(mockList, Mockito.times(1)).add(ANOTHER_TEST_INDEX, INGREDIENT);
         Mockito.verifyNoMoreInteractions(mockList);
@@ -60,7 +62,6 @@ public class BurgerTest {
 
     @Test
     public void getPriceShouldReturnExpectedPrice() {
-        burger = new Burger();
         burger.setBuns(BUN);
         burger.addIngredient(INGREDIENT);
         float expectedPrice = 2 * BUN_PRICE + INGREDIENT_PRICE;
@@ -70,14 +71,12 @@ public class BurgerTest {
 
     @Test
     public void getPriceWithoutBunShouldThrowNPE() {
-        burger = new Burger();
         burger.addIngredient(INGREDIENT);
         Assertions.assertThrowsExactly(NullPointerException.class, () -> burger.getPrice());
     }
 
     @Test
     public void getPriceWithoutIngredientShouldReturnDoubleBunPrice() {
-        burger = new Burger();
         burger.setBuns(BUN);
         Assertions.assertEquals(2 * BUN_PRICE, burger.getPrice());
     }
@@ -93,7 +92,6 @@ public class BurgerTest {
         Mockito.when(mockIngredient.getPrice()).thenReturn(INGREDIENT_PRICE);
         float expectedPrice = 2 * BUN_PRICE + INGREDIENT_PRICE;
 
-        burger = new Burger();
         burger.setBuns(BUN);
         burger.addIngredient(INGREDIENT);
 
@@ -108,7 +106,6 @@ public class BurgerTest {
 
     @Test
     public void getReceiptWithoutBunShouldThrowNPE() {
-        burger = new Burger();
         burger.addIngredient(INGREDIENT);
         Assertions.assertThrowsExactly(NullPointerException.class, () -> burger.getReceipt());
     }
@@ -120,7 +117,6 @@ public class BurgerTest {
         Mockito.when(mockBun.getPrice()).thenReturn(BUN_PRICE);
         float expectedPrice = 2 * BUN_PRICE;
 
-        burger = new Burger();
         burger.setBuns(mockBun);
 
         StringBuilder buildingReceipt = new StringBuilder(String.format("(==== %s ====)%n", BUN_NAME));
