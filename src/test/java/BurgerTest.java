@@ -1,6 +1,8 @@
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -60,25 +62,21 @@ public class BurgerTest {
         Mockito.verifyNoMoreInteractions(mockList);
     }
 
-    @Test
-    public void getPriceShouldReturnExpectedPrice() {
+    @ParameterizedTest
+    @ValueSource(ints = {0,1})
+    public void getPriceShouldReturnExpectedPrice(int numberOfIngredients) {
         burger.setBuns(BUN);
-        burger.addIngredient(INGREDIENT);
-        float expectedPrice = 2 * BUN_PRICE + INGREDIENT_PRICE;
-        float actualPrice = burger.getPrice();
-        Assertions.assertEquals(expectedPrice, actualPrice);
+        for (int i = 0; i < numberOfIngredients; i++)
+            burger.addIngredient(INGREDIENT);
+        float expectedPrice = getExpectedPrice(numberOfIngredients);
+
+        Assertions.assertEquals(expectedPrice, burger.getPrice());
     }
 
     @Test
     public void getPriceWithoutBunShouldThrowNPE() {
         burger.addIngredient(INGREDIENT);
         Assertions.assertThrowsExactly(NullPointerException.class, () -> burger.getPrice());
-    }
-
-    @Test
-    public void getPriceWithoutIngredientShouldReturnDoubleBunPrice() {
-        burger.setBuns(BUN);
-        Assertions.assertEquals(2 * BUN_PRICE, burger.getPrice());
     }
 
     @Test
@@ -127,4 +125,7 @@ public class BurgerTest {
         Assertions.assertEquals(expectedReceipt, burger.getReceipt());
     }
 
+    private float getExpectedPrice(int numOfIngredients) {
+        return BUN_PRICE * 2 + INGREDIENT_PRICE * numOfIngredients;
+    }
 }
