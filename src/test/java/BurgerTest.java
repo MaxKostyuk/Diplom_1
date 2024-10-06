@@ -63,7 +63,7 @@ public class BurgerTest {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = {0,1})
+    @ValueSource(ints = {0, 1})
     public void getPriceShouldReturnExpectedPrice(int numberOfIngredients) {
         burger.setBuns(BUN);
         for (int i = 0; i < numberOfIngredients; i++)
@@ -79,8 +79,9 @@ public class BurgerTest {
         Assertions.assertThrowsExactly(NullPointerException.class, () -> burger.getPrice());
     }
 
-    @Test
-    public void getReceiptShouldReturnExpectedString() {
+    @ParameterizedTest
+    @ValueSource(ints = {0, 1})
+    public void getReceiptShouldReturnExpectedString(int numOfIngredients) {
         Bun mockBun = Mockito.mock(Bun.class);
         Ingredient mockIngredient = Mockito.mock(Ingredient.class);
         Mockito.when(mockBun.getName()).thenReturn(BUN_NAME);
@@ -88,16 +89,11 @@ public class BurgerTest {
         Mockito.when(mockIngredient.getName()).thenReturn(INGREDIENT_NAME);
         Mockito.when(mockIngredient.getType()).thenReturn(INGREDIENT_TYPE);
         Mockito.when(mockIngredient.getPrice()).thenReturn(INGREDIENT_PRICE);
-        float expectedPrice = 2 * BUN_PRICE + INGREDIENT_PRICE;
+        String expectedReceipt = getExpectedReceipt(numOfIngredients);
 
         burger.setBuns(BUN);
-        burger.addIngredient(INGREDIENT);
-
-        StringBuilder buildingReceipt = new StringBuilder(String.format("(==== %s ====)%n", BUN_NAME));
-        buildingReceipt.append(String.format("= %s %s =%n", INGREDIENT_TYPE.toString().toLowerCase(), INGREDIENT_NAME));
-        buildingReceipt.append(String.format("(==== %s ====)%n", BUN_NAME));
-        buildingReceipt.append(String.format("%nPrice: %f%n", expectedPrice));
-        String expectedReceipt = buildingReceipt.toString();
+        for (int i = 0; i < numOfIngredients; i++)
+            burger.addIngredient(INGREDIENT);
 
         Assertions.assertEquals(expectedReceipt, burger.getReceipt());
     }
@@ -108,24 +104,17 @@ public class BurgerTest {
         Assertions.assertThrowsExactly(NullPointerException.class, () -> burger.getReceipt());
     }
 
-    @Test
-    public void getReceiptWithoutIngredientShouldReturnExpectedString() {
-        Bun mockBun = Mockito.mock(Bun.class);
-        Mockito.when(mockBun.getName()).thenReturn(BUN_NAME);
-        Mockito.when(mockBun.getPrice()).thenReturn(BUN_PRICE);
-        float expectedPrice = 2 * BUN_PRICE;
-
-        burger.setBuns(mockBun);
-
-        StringBuilder buildingReceipt = new StringBuilder(String.format("(==== %s ====)%n", BUN_NAME));
-        buildingReceipt.append(String.format("(==== %s ====)%n", BUN_NAME));
-        buildingReceipt.append(String.format("%nPrice: %f%n", expectedPrice));
-        String expectedReceipt = buildingReceipt.toString();
-
-        Assertions.assertEquals(expectedReceipt, burger.getReceipt());
-    }
-
     private float getExpectedPrice(int numOfIngredients) {
         return BUN_PRICE * 2 + INGREDIENT_PRICE * numOfIngredients;
+    }
+
+    private String getExpectedReceipt(int numOfIngredients) {
+        StringBuilder buildingReceipt = new StringBuilder(String.format("(==== %s ====)%n", BUN_NAME));
+        for (int i = 0; i < numOfIngredients; i++)
+            buildingReceipt.append(String.format("= %s %s =%n", INGREDIENT_TYPE.toString().toLowerCase(), INGREDIENT_NAME));
+        buildingReceipt.append(String.format("(==== %s ====)%n", BUN_NAME));
+        buildingReceipt.append(String.format("%nPrice: %f%n", getExpectedPrice(numOfIngredients)));
+        String expectedReceipt = buildingReceipt.toString();
+        return expectedReceipt;
     }
 }
